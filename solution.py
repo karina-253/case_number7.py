@@ -41,7 +41,7 @@ def get_last_page(search_query):
     return int(last_page_tag.text) if last_page_tag else 1
 
 
-def generate_product_urls(search_query):
+def get_product_urls(search_query):
     """
     Generates URLs of all products for a search query, taking into account pagination.
 
@@ -53,7 +53,7 @@ def generate_product_urls(search_query):
     """
     total_pages = get_last_page(search_query)
     for page in range(0, total_pages + 1):
-        if page == 0:
+        if page==0:
             url = f'https://obuv-tut2000.ru/magazin/search?&gr_smart_search=1&search_text={search_query}'
         else:
             url = f'https://obuv-tut2000.ru/magazin/search?p={page}&gr_smart_search=1&search_text={search_query}'
@@ -65,7 +65,7 @@ def generate_product_urls(search_query):
             yield "https://obuv-tut2000.ru" + href
 
 
-def parse_product(url):
+def product_information(url):
     """
     Parses product data from its page.
 
@@ -93,6 +93,7 @@ def parse_product(url):
         season = check(data.find("div", class_="option-item sezon even"), 5)
         price_str = data.find("strong").text.strip()
 
+        
         price_value = int(price_str) if price_str else 0
 
         return {
@@ -129,20 +130,22 @@ def save_results(products, filename="sorted_products.txt"):
             f.write(f"{lcl.SIZE}: {product['size']}\n")
             f.write(f"{lcl.SEASON}: {product['season']}\n")
             f.write(f"{lcl.PRICE}: {product['price']} руб.\n")
-            f.write("-" * 40 + "\n")
+            f.write("-"*40 + "\n")
 
 
 search_query = input(f"{lcl.ENTER_SEARCH_QUERY}:")
 products = []
 
-for url in generate_product_urls(search_query):
+for url in get_product_urls(search_query):
     time.sleep(3)
-    product_data = parse_product(url)
+    product_data = product_information(url)
     if product_data:
         products.append(product_data)
 
+
 products.sort(key=lambda x: x['price'])
+
 
 save_results(products)
 
-print(f"{lcl.PRODUCT_INFORMATION_IN_THE_FOLLOWING_FILE}:", "sorted_products.txt")
+print(f"{lcl.PRODUCT_INFORMATION_IN_THE_FOLLOWING_FILE}:", "sorted_products.txt" )
